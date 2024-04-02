@@ -1,8 +1,8 @@
 package controler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"lkrouter/pkg/egresserv"
 	"net/http"
 )
 
@@ -11,8 +11,9 @@ type EgressStartData struct {
 }
 
 type EgressStartResponse struct {
-	Room   string `json:"room"`
-	Status string `json:"status"`
+	Room     string `json:"room"`
+	Status   string `json:"status"`
+	EgressID string `json:"egressID"`
 }
 
 func EgressController(c *gin.Context) {
@@ -21,12 +22,12 @@ func EgressController(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-
-	fmt.Println(data)
+	eggressID := egresserv.StartTrackEgress(data.Room)
 
 	response := EgressStartResponse{
-		Room:   data.Room,
-		Status: "ok",
+		Room:     data.Room,
+		Status:   "ok",
+		EgressID: eggressID,
 	}
 	c.JSON(http.StatusAccepted, &response)
 }

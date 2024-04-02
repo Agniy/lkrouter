@@ -25,12 +25,14 @@ type (
 	Config struct {
 		App
 		Mongo
+		AWSConfig
+		LivekitConfig
 	}
 
 	// App -.
 	App struct {
 		GoogleAppCredPath string `env:"GOOGLE_APPLICATION_CREDENTIALS"`
-		Debug             bool   `env:"DEBUG" env-default:"false"`
+		GinMode           string `env:"GIN_MODE" env-default:"release"`
 		Domain            string `env:"DOMAIN" env-default:"localhost"`
 		Port              string `env:"PORT" env-default:"8080"`
 		CertPath          string `env:"CERT_PATH" env-default:""`
@@ -40,6 +42,19 @@ type (
 	Mongo struct {
 		MongoDbConnection string `env:"MONGO_DB_CONNECTION"`
 		MongoDbName       string `env:"MONGO_DB_NAME"`
+	}
+
+	AWSConfig struct {
+		AWSAccessKey string `env:"AWS_ACCESS_KEY" env-default:""`
+		AWSSecret    string `env:"AWS_SECRET" env-default:""`
+		AWSRegion    string `env:"AWS_REGION" env-default:""`
+		AWSBucket    string `env:"AWS_BUCKET" env-default:""`
+	}
+
+	LivekitConfig struct {
+		LVHost      string `env:"LIVEKIT_HOST" env-default:""`
+		LVApiKey    string `env:"LIVEKIT_API_KEY" env-default:""`
+		LVApiSecret string `env:"LIVEKIT_API_SECRET" env-default:""`
 	}
 )
 
