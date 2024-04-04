@@ -33,6 +33,7 @@ type (
 	App struct {
 		GoogleAppCredPath string `env:"GOOGLE_APPLICATION_CREDENTIALS"`
 		GinMode           string `env:"GIN_MODE" env-default:"release"`
+		Debug             string `env:"DEBUG" env-default:"0"`
 		Domain            string `env:"DOMAIN" env-default:""`
 		Port              string `env:"PORT" env-default:"8090"`
 		CertPath          string `env:"CERT_PATH" env-default:""`

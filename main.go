@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"lkrouter/config"
+	"lkrouter/pkg/keyreloader"
 	"lkrouter/router"
 	"log"
 	"net/http"
@@ -28,9 +30,26 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	fmt.Println("Server lkrouter started at: ", httpAddr)
+	if cfg.Debug == "1" {
+		errServer := srv.ListenAndServe()
+		if errServer != nil {
+			panic(errServer)
+		}
+	} else {
+		//add tls certs
+		kpr, err := keyreloader.NewKeypairReloader(cfg.CertPath, cfg.KeyPath)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	if err := srv.ListenAndServe(); err != nil {
-		log.Printf("Failed to start server: %v", err)
+		srv.TLSConfig = &tls.Config{
+			GetCertificate: kpr.GetCertificateFunc(),
+		}
+		errServer := srv.ListenAndServeTLS("", "")
+		if errServer != nil {
+			panic(errServer)
+		}
 	}
+
+	fmt.Println("Server lkrouter started at: ", httpAddr)
 }
