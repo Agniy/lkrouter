@@ -24,7 +24,7 @@ func RouterConfig(r *gin.Engine) {
 		expectedHost += ":" + cfg.Port
 	}
 
-	if cfg.GinMode == "debug" {
+	if cfg.GinMode != "debug" {
 		r.Use(func(c *gin.Context) {
 			if c.Request.Host != expectedHost {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid host header"})
