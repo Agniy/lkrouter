@@ -1,12 +1,9 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"lkrouter/config"
-	"lkrouter/pkg/keyreloader"
 	"lkrouter/router"
-	"log"
 	"net/http"
 	"time"
 )
@@ -31,21 +28,23 @@ func main() {
 	}
 
 	if cfg.Debug == "1" {
+		fmt.Println("Server lkrouter started at none tls mode: ", httpAddr)
 		errServer := srv.ListenAndServe()
 		if errServer != nil {
 			panic(errServer)
 		}
 	} else {
 		//add tls certs
-		kpr, err := keyreloader.NewKeypairReloader(cfg.CertPath, cfg.KeyPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		srv.TLSConfig = &tls.Config{
-			GetCertificate: kpr.GetCertificateFunc(),
-		}
-		errServer := srv.ListenAndServeTLS("", "")
+		//kpr, err := keyreloader.NewKeypairReloader(cfg.CertPath, cfg.KeyPath)
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//
+		//srv.TLSConfig = &tls.Config{
+		//	GetCertificate: kpr.GetCertificateFunc(),
+		//}
+		fmt.Println("Server lkrouter started at tls mode: ", httpAddr)
+		errServer := srv.ListenAndServeTLS(cfg.CertPath, cfg.KeyPath)
 		if errServer != nil {
 			panic(errServer)
 		}
