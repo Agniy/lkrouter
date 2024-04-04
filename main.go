@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"lkrouter/config"
 	"lkrouter/router"
 	"log"
@@ -26,6 +27,8 @@ func main() {
 		// set timeout due CWE-400 - Potential Slowloris Attack
 		ReadHeaderTimeout: 5 * time.Second,
 	}
+
+	fmt.Println("Server lkrouter started at: ", httpAddr)
 
 	if err := srv.ListenAndServe(); err != nil {
 		log.Printf("Failed to start server: %v", err)
