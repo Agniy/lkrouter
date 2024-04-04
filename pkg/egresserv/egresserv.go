@@ -6,9 +6,11 @@ import (
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go/v2"
 	"lkrouter/config"
+	"lkrouter/utils"
+	"strings"
 )
 
-func StartTrackEgress(roomName string) string {
+func StartTrackEgress(roomName string, company string) string {
 	config := config.GetConfig()
 	ctx := context.Background()
 	egressClient := lksdk.NewEgressClient(
@@ -17,6 +19,8 @@ func StartTrackEgress(roomName string) string {
 		config.LVApiSecret,
 	)
 
+	fileName := "audio_" + utils.RemoveSpaces(roomName) + "_" + strings.ToLower(utils.RemoveSpaces(company)) + ".ogg"
+
 	fileRequest := &livekit.RoomCompositeEgressRequest{
 		RoomName:  roomName,
 		Layout:    "1x1",
@@ -24,7 +28,7 @@ func StartTrackEgress(roomName string) string {
 		Output: &livekit.RoomCompositeEgressRequest_File{
 			File: &livekit.EncodedFileOutput{
 				FileType: livekit.EncodedFileType_OGG,
-				Filepath: "livekit-demo/track-test.ogg",
+				Filepath: fileName,
 				Output: &livekit.EncodedFileOutput_S3{
 					S3: &livekit.S3Upload{
 						AccessKey: config.AWSAccessKey,

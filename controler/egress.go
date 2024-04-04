@@ -7,7 +7,8 @@ import (
 )
 
 type EgressStartData struct {
-	Room string `json:"room"`
+	Room    string `json:"room"`
+	Company string `json:"company"`
 }
 
 type EgressStartResponse struct {
@@ -22,7 +23,7 @@ func EgressController(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	eggressID := egresserv.StartTrackEgress(data.Room)
+	eggressID := egresserv.StartTrackEgress(data.Room, data.Company)
 
 	response := EgressStartResponse{
 		Room:     data.Room,
