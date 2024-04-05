@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"lkrouter/config"
 	"lkrouter/utils"
+	"log"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,7 @@ func RecordEndedController(c *gin.Context) {
 		return
 	}
 
+	log.Printf("Get data about ended record: %s", data)
 	err = utils.SendWebhookData(jsonData, cfg.WebhookURL, cfg.WebhookUsername, cfg.WebhookPassword)
 	if err != nil {
 		c.AbortWithError(500, err)
