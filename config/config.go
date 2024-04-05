@@ -3,8 +3,9 @@ package config
 import (
 	"fmt"
 	"log"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
-import "github.com/ilyakaznacheev/cleanenv"
 
 var cfg *Config
 var cfgError error
@@ -27,6 +28,7 @@ type (
 		Mongo
 		AWSConfig
 		LivekitConfig
+		Webhook
 	}
 
 	// App -.
@@ -56,6 +58,12 @@ type (
 		LVHost      string `env:"LIVEKIT_HOST" env-default:""`
 		LVApiKey    string `env:"LIVEKIT_API_KEY" env-default:""`
 		LVApiSecret string `env:"LIVEKIT_API_SECRET" env-default:""`
+	}
+
+	Webhook struct {
+		WebhookURL      string `env:"WEBHOOK_URL" env-default:""`
+		WebhookUsername string `env:"WEBHOOK_USERNAME" env-default:""`
+		WebhookPassword string `env:"WEBHOOK_PASSWORD" env-default:""`
 	}
 )
 

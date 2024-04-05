@@ -1,17 +1,42 @@
 package controler
 
-import "github.com/gin-gonic/gin"
+import (
+	"encoding/json"
+	"fmt"
+	"lkrouter/config"
+	"lkrouter/utils"
+	"time"
+
+	"github.com/gin-gonic/gin"
+)
 
 type RecordEndedData struct {
-	Room     string `json:"room"`
-	AudioUrl string `json:"audioUrl"`
-	VideoUrl string `json:"videoUrl"`
+	Room      string `json:"room"`
+	AudioUrl  string `json:"audioUrl"`
+	VideoUrl  string `json:"videoUrl"`
+	Timestamp string `json:"timestamp"`
+	HashCode  string `json:"hashCode"`
 }
 
 func RecordEndedController(c *gin.Context) {
+	cfg := config.GetConfig()
 	data := RecordEndedData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(400, err)
+		return
+	}
+	data.Timestamp = fmt.Sprintf("%d", time.Now().Unix())
+	data.HashCode = utils.EncryptAuthData(cfg.WebhookUsername, cfg.WebhookPassword, data.Timestamp)
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		c.AbortWithError(400, err)
+		return
+	}
+
+	err = utils.SendWebhookData(jsonData, cfg.WebhookURL, cfg.WebhookUsername, cfg.WebhookPassword)
+	if err != nil {
+		c.AbortWithError(500, err)
 		return
 	}
 
