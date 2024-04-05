@@ -1,9 +1,10 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"lkrouter/config"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var r *gin.Engine
@@ -13,6 +14,7 @@ func init() {
 
 	RouterConfig(r)
 	EgressRouter(r)
+	WebhookRouter(r)
 }
 
 func RouterConfig(r *gin.Engine) {
