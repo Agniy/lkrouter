@@ -31,6 +31,8 @@ func RecordEndedController(c *gin.Context) {
 	data.HashCode = utils.EncryptAuthData(cfg.WebhookUsername, cfg.WebhookPassword, data.Timestamp)
 	data.Event = "recordUrl"
 
+	log.Printf("We send data to the next server: ", data)
+
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		c.AbortWithError(400, err)
