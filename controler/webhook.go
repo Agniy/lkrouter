@@ -17,6 +17,7 @@ type RecordEndedData struct {
 	VideoUrl  string `json:"videoUrl"`
 	Timestamp string `json:"timestamp"`
 	HashCode  string `json:"hashCode"`
+	Event     string `json:"event"`
 }
 
 func RecordEndedController(c *gin.Context) {
@@ -28,6 +29,7 @@ func RecordEndedController(c *gin.Context) {
 	}
 	data.Timestamp = fmt.Sprintf("%d", time.Now().Unix())
 	data.HashCode = utils.EncryptAuthData(cfg.WebhookUsername, cfg.WebhookPassword, data.Timestamp)
+	data.Event = "recordUrl"
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
