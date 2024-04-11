@@ -1,8 +1,10 @@
 package controler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"lkrouter/pkg/egresserv"
+	"lkrouter/pkg/livekitserv"
 	"net/http"
 )
 
@@ -24,6 +26,14 @@ func EgressController(c *gin.Context) {
 		return
 	}
 	eggressID := egresserv.StartTrackEgress(data.Room, data.Company)
+
+	_, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]string{
+		"rec": "true",
+	})
+
+	if err != nil {
+		fmt.Println("Error updating room metadata", err)
+	}
 
 	response := EgressStartResponse{
 		Room:     data.Room,
