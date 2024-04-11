@@ -12,11 +12,7 @@ func main() {
 	cfg := config.GetConfig()
 	r := router.GetRouter()
 
-	httpPort := cfg.Port
-	httpAddr := cfg.Domain
-	if httpPort != "80" {
-		httpAddr += ":" + httpPort
-	}
+	httpAddr := ":" + cfg.Port
 
 	// Create server with timeout
 	srv := &http.Server{
@@ -27,11 +23,9 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	fmt.Println("Server lkrouter started at none tls mode: ", httpAddr)
+	fmt.Println("Server lkrouter started: ", httpAddr)
 	errServer := srv.ListenAndServe()
 	if errServer != nil {
 		panic(errServer)
 	}
-
-	fmt.Println("Server lkrouter started at: ", httpAddr)
 }
