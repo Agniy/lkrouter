@@ -13,6 +13,7 @@ import (
 
 type RecordEndedData struct {
 	Room      string `json:"room"`
+	Company   string `json:"company"`
 	AudioUrl  string `json:"audioUrl"`
 	VideoUrl  string `json:"videoUrl"`
 	Timestamp string `json:"timestamp"`
