@@ -1,10 +1,8 @@
 package router
 
 import (
-	"lkrouter/config"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"lkrouter/config"
 )
 
 var r *gin.Engine
@@ -26,15 +24,15 @@ func RouterConfig(r *gin.Engine) {
 		expectedHost += ":" + cfg.Port
 	}
 
-	if cfg.GinMode != "debug" {
-		r.Use(func(c *gin.Context) {
-			if c.Request.Host != expectedHost {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid host header"})
-				return
-			}
-			c.Next()
-		})
-	}
+	//if cfg.GinMode != "debug" {
+	//	r.Use(func(c *gin.Context) {
+	//		if c.Request.Host != expectedHost {
+	//			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid host header"})
+	//			return
+	//		}
+	//		c.Next()
+	//	})
+	//}
 
 	r.Use(gin.Recovery())
 }
