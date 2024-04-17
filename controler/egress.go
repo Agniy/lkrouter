@@ -46,6 +46,5 @@ func EgressController(c *gin.Context) {
 		Status:   "ok",
 		EgressID: eggressID,
 	}
-	c.Header("Access-Control-Allow-Origin", "*")
 	c.JSON(http.StatusAccepted, &response)
 }
