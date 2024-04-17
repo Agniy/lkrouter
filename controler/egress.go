@@ -27,6 +27,8 @@ func EgressController(c *gin.Context) {
 	}
 	eggressID := egresserv.StartTrackEgress(data.Room, data.Company)
 
+	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
+
 	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]string{
 		"rec": "true",
 	})
