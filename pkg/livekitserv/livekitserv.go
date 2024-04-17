@@ -19,7 +19,7 @@ type LiveKitService struct {
 	client *lksdk.RoomServiceClient
 }
 
-func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]string) (*livekit.Room, error) {
+func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]interface{}) (*livekit.Room, error) {
 	ctx := context.Background()
 	jsonBytes, err := json.Marshal(metadata)
 	if err != nil {

@@ -20,6 +20,8 @@ type EgressStartResponse struct {
 }
 
 func EgressController(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
 	data := EgressStartData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -29,8 +31,8 @@ func EgressController(c *gin.Context) {
 
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
 
-	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]string{
-		"rec": "true",
+	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
+		"rec": true,
 	})
 
 	if err != nil {
