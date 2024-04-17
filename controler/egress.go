@@ -27,13 +27,15 @@ func EgressController(c *gin.Context) {
 	}
 	eggressID := egresserv.StartTrackEgress(data.Room, data.Company)
 
-	_, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]string{
+	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]string{
 		"rec": "true",
 	})
 
 	if err != nil {
 		fmt.Println("Error updating room metadata", err)
 	}
+
+	fmt.Println("Room metadata updated", room.Metadata)
 
 	response := EgressStartResponse{
 		Room:     data.Room,

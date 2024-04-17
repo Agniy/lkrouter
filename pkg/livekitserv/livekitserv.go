@@ -27,7 +27,7 @@ func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]stri
 	}
 
 	req := &livekit.UpdateRoomMetadataRequest{
-		Room:     "your_room_name",
+		Room:     roomID,
 		Metadata: string(jsonBytes),
 	}
 	room, err := l.client.UpdateRoomMetadata(ctx, req)

@@ -18,6 +18,7 @@ type RecordEndedData struct {
 	Timestamp string `json:"timestamp"`
 	HashCode  string `json:"hashCode"`
 	Event     string `json:"event"`
+	FileSize  int64  `json:"fileSize"`
 }
 
 func RecordEndedController(c *gin.Context) {
