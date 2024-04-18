@@ -36,3 +36,13 @@ func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]inte
 	}
 	return room, nil
 }
+
+func (l *LiveKitService) GetAllActiveCalls() (*livekit.ListRoomsResponse, error) {
+	ctx := context.Background()
+	req := &livekit.ListRoomsRequest{}
+	rooms, err := l.client.ListRooms(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return rooms, nil
+}

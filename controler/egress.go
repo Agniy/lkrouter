@@ -20,8 +20,6 @@ type EgressStartResponse struct {
 }
 
 func EgressController(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-
 	data := EgressStartData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)

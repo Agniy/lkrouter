@@ -11,7 +11,7 @@ func EgressRouter(r *gin.Engine) {
 	{
 		egreessRouter.OPTIONS("/start/", func(c *gin.Context) {
 			fmt.Println("OPTIONS /record/start/ request")
-			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+			c.Writer.Header().Set("Access-Control-Allow-Origin", "teleporta.me")
 			c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
 			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 			c.Writer.Header().Set("Access-Control-Max-Age", "86400")
