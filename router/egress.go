@@ -8,7 +8,7 @@ import "lkrouter/controler"
 func EgressRouter(r *gin.Engine) {
 	egreessRouter := r.Group("/record")
 	{
-		egreessRouter.POST("/start/", func(c *gin.Context) {
+		egreessRouter.POST("/start", func(c *gin.Context) {
 			controler.EgressController(c)
 		})
 	}
