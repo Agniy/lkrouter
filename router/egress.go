@@ -1,12 +1,16 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+)
 import "lkrouter/controler"
 
 func EgressRouter(r *gin.Engine) {
 	egreessRouter := r.Group("/record")
 	{
 		egreessRouter.OPTIONS("/start/", func(c *gin.Context) {
+			fmt.Println("OPTIONS /record/start/ request")
 			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 			c.Writer.Header().Set("Access-Control-Allow-Methods", "POST")
 			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
