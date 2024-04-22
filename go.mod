@@ -7,6 +7,8 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/livekit/protocol v1.12.0
 	github.com/livekit/server-sdk-go/v2 v2.0.6
+	github.com/pion/webrtc/v3 v3.2.28
+	github.com/sirupsen/logrus v1.9.3
 )
 
 require (
@@ -68,7 +70,6 @@ require (
 	github.com/pion/stun v0.6.1 // indirect
 	github.com/pion/transport/v2 v2.2.4 // indirect
 	github.com/pion/turn/v2 v2.1.3 // indirect
-	github.com/pion/webrtc/v3 v3.2.28 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect

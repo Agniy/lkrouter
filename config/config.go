@@ -29,6 +29,7 @@ type (
 		AWSConfig
 		LivekitConfig
 		Webhook
+		TranscribeConfig
 	}
 
 	// App -.
@@ -58,6 +59,10 @@ type (
 		LVHost      string `env:"LIVEKIT_HOST" env-default:""`
 		LVApiKey    string `env:"LIVEKIT_API_KEY" env-default:""`
 		LVApiSecret string `env:"LIVEKIT_API_SECRET" env-default:""`
+	}
+
+	TranscribeConfig struct {
+		TranscribeAddr string `env:"TRANSCRIBE_ADDR" env-default:"http://localhost:8099/transcriber/start"`
 	}
 
 	Webhook struct {

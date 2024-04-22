@@ -49,3 +49,21 @@ func StartTrackEgress(roomName string, company string) string {
 
 	return info.EgressId
 }
+
+func TrackEgressRequest(roomID string, trackID string, wsURL string) (*livekit.EgressInfo, error) {
+	cfg := config.GetConfig()
+	client := lksdk.NewEgressClient(cfg.LVHost, cfg.LVApiKey, cfg.LVApiSecret)
+	ctx := context.Background()
+	req := &livekit.TrackEgressRequest{
+		RoomName: roomID,
+		TrackId:  trackID,
+		Output: &livekit.TrackEgressRequest_WebsocketUrl{
+			WebsocketUrl: wsURL,
+		},
+	}
+	info, err := client.StartTrackEgress(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
