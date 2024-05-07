@@ -62,7 +62,7 @@ type (
 	}
 
 	TranscribeConfig struct {
-		TranscribeAddr string `env:"TRANSCRIBE_ADDR" env-default:"http://localhost:8099/transcriber/start"`
+		TranscribeAddr string `env:"TRANSCRIBE_ADDR" env-default:"http://10.0.0.127:8095/transcriber/"`
 	}
 
 	Webhook struct {

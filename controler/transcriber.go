@@ -1,23 +1,49 @@
 package controler
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"lkrouter/communications"
-	"lkrouter/config"
-	"lkrouter/pkg/egresserv"
-	"strconv"
+	"lkrouter/pkg/livekitserv"
 )
 
-type TranscriberStartData struct {
-	Room     string `json:"room"`
-	Lang     string `json:"lang"`
-	EgressId string `json:"egressId"`
+type TranscriberData struct {
+	Room string `json:"room"`
+	Lang string `json:"lang"`
+	Uid  string `json:"uid"`
 }
 
 func TranscriberStartController(c *gin.Context) {
-	cfg := config.GetConfig()
-	data := TranscriberStartData{}
+	data := TranscriberData{}
+	if err := c.BindJSON(&data); err != nil {
+		c.AbortWithError(400, err)
+		return
+	}
+
+	trackId, err := livekitserv.NewLiveKitService().GetAudioTrackID(data.Room, data.Uid)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	// get url from transcriber service
+	transcRequest := communications.TranscribeReq{
+		Room:          data.Room,
+		Lang:          data.Lang,
+		TrackId:       trackId,
+		ParticipantId: data.Uid,
+	}
+
+	transcResponse, err := transcRequest.TranscriberAction("start")
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	c.JSON(200, transcResponse)
+}
+
+func TranscriberStopController(c *gin.Context) {
+	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(400, err)
 		return
@@ -25,27 +51,15 @@ func TranscriberStartController(c *gin.Context) {
 
 	// get url from transcriber service
 	transcRequest := communications.TranscribeReq{
-		Room: data.Room,
-		Lang: data.Lang,
+		Room:          data.Room,
+		ParticipantId: data.Uid,
 	}
-	transcribePort, err := communications.GetTranscribePort(cfg.TranscribeAddr, &transcRequest)
+
+	transcResponse, err := transcRequest.TranscriberAction("stop")
 	if err != nil {
 		c.AbortWithError(500, err)
 		return
 	}
 
-	fmt.Println("Transcribe port: ", transcribePort, " for room: ", data.Room, " lang: ", data.Lang)
-
-	wsUrl := "wss://127.0.0.1:" + strconv.Itoa(transcribePort)
-	// start tracking egress
-	egresInfo, err := egresserv.TrackEgressRequest(data.Room, data.Lang, wsUrl)
-	if err != nil {
-		c.AbortWithError(500, err)
-		return
-	}
-	data.EgressId = egresInfo.EgressId
-
-	fmt.Println("Egress info: ", egresInfo)
-
-	c.JSON(200, data)
+	c.JSON(200, transcResponse)
 }

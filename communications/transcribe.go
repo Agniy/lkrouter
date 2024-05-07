@@ -2,49 +2,37 @@ package communications
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
-	"github.com/sirupsen/logrus"
+	"lkrouter/config"
+	"log"
 	"net/http"
 )
 
 type TranscribeReq struct {
-	Id               string   `json:"id"`
-	Uid              string   `json:"uid"`
-	Room             string   `json:"room"`
-	Lang             string   `json:"lang"`
-	LangText         string   `json:"lang_text"`
-	LangAlternatives []string `json:"langAlternatives"`
-	Action           string   `json:"-"`
+	Room          string `json:"room"`
+	Lang          string `json:"lang"`
+	TrackId       string `json:"trackID"`
+	ParticipantId string `json:"participantId"`
 }
 
-type BaseAddrResponse struct {
-	Port int `json:"port"`
-}
-
-func GetTranscribePort(addrUri string, transcReq *TranscribeReq) (int, error) {
-
-	logger := logrus.New()
-
-	logger.Infof("GetTranscribePort start, by url %s", addrUri)
-	data, err := json.Marshal(transcReq)
+func (tr *TranscribeReq) TranscriberAction(action string) (TranscribeReq, error) {
+	cfg := config.GetConfig()
+	jsonData, err := json.Marshal(tr)
 	if err != nil {
-		return 0, err
-	}
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	resp, err := http.Post(addrUri, "application/json",
-		bytes.NewBuffer(data))
-	if err != nil {
-		logger.Errorf("http.Post %v", err)
-		return 0, err
+		log.Fatalf("Error occurred during marshaling. Err: %s", err.Error())
 	}
 
-	var res BaseAddrResponse
-	err = json.NewDecoder(resp.Body).Decode(&res)
+	resp, err := http.Post(cfg.TranscribeAddr+action, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		logger.Errorf("BaseAddrResponse decode %v", err)
-		return 0, err
+		log.Fatalf("Error occurred during request. Err: %s", err.Error())
 	}
-	logger.Infof("got transcribe port %d", res.Port)
-	return res.Port, nil
+	defer resp.Body.Close()
+
+	var transcriberResponse TranscribeReq
+	err = json.NewDecoder(resp.Body).Decode(&transcriberResponse)
+	if err != nil {
+		return TranscribeReq{}, err
+	}
+
+	return transcriberResponse, nil
 }

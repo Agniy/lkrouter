@@ -46,3 +46,22 @@ func (l *LiveKitService) GetAllActiveCalls() (*livekit.ListRoomsResponse, error)
 	}
 	return rooms, nil
 }
+
+func (l *LiveKitService) GetAudioTrackID(roomID string, participantID string) (string, error) {
+	res, err := l.client.GetParticipant(context.Background(), &livekit.RoomParticipantIdentity{
+		Room:     roomID,
+		Identity: participantID,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, track := range res.Tracks {
+		if track.Type == livekit.TrackType_AUDIO {
+			return track.Sid, nil
+		}
+	}
+
+	return "", nil
+}
