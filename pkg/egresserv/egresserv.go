@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func StartTrackEgress(roomName string, company string) string {
+func StartTrackEgress(roomName string, company string) (string, error) {
 	config := config.GetConfig()
 	ctx := context.Background()
 	egressClient := lksdk.NewEgressClient(
@@ -44,10 +44,11 @@ func StartTrackEgress(roomName string, company string) string {
 	info, err := egressClient.StartRoomCompositeEgress(ctx, fileRequest)
 	if err != nil {
 		fmt.Println("Error in StartTrackEgress:", err)
+		return "", err
 	}
 	fmt.Println("StartTrackEgress:", info.EgressId)
 
-	return info.EgressId
+	return info.EgressId, nil
 }
 
 func TrackEgressRequest(roomID string, trackID string, wsURL string) (*livekit.EgressInfo, error) {

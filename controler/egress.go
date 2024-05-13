@@ -25,7 +25,11 @@ func EgressController(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	eggressID := egresserv.StartTrackEgress(data.Room, data.Company)
+	eggressID, err := egresserv.StartTrackEgress(data.Room, data.Company)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
+		return
+	}
 
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
 
