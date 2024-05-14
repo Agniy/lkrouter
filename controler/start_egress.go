@@ -5,7 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
+	"lkrouter/pkg/redisdb"
 	"net/http"
+	"time"
 )
 
 type EgressStartData struct {
@@ -19,16 +21,22 @@ type EgressStartResponse struct {
 	EgressID string `json:"egressID"`
 }
 
-func EgressController(c *gin.Context) {
+func StartEgressController(c *gin.Context) {
 	data := EgressStartData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	eggressID, err := egresserv.StartTrackEgress(data.Room, data.Company)
+	egressId, err := egresserv.StartTrackEgress(data.Room, data.Company)
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return
+	}
+
+	// save to redis db
+	err = redisdb.Set("room_egress_"+data.Room, egressId, 24*time.Hour)
+	if err != nil {
+		fmt.Println("Error saving egress ID to redis", err)
 	}
 
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
@@ -46,7 +54,7 @@ func EgressController(c *gin.Context) {
 	response := EgressStartResponse{
 		Room:     data.Room,
 		Status:   "ok",
-		EgressID: eggressID,
+		EgressID: egressId,
 	}
 	c.JSON(http.StatusAccepted, &response)
 }

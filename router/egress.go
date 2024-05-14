@@ -9,7 +9,10 @@ func EgressRouter(r *gin.Engine) {
 	egreessRouter := r.Group("/record")
 	{
 		egreessRouter.POST("/start", func(c *gin.Context) {
-			controler.EgressController(c)
+			controler.StartEgressController(c)
+		})
+		egreessRouter.POST("/stop", func(c *gin.Context) {
+			controler.StopEgressController(c)
 		})
 	}
 }

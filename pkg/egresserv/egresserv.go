@@ -11,12 +11,12 @@ import (
 )
 
 func StartTrackEgress(roomName string, company string) (string, error) {
-	config := config.GetConfig()
+	cfg := config.GetConfig()
 	ctx := context.Background()
 	egressClient := lksdk.NewEgressClient(
-		config.LVHost,
-		config.LVApiKey,
-		config.LVApiSecret,
+		cfg.LVHost,
+		cfg.LVApiKey,
+		cfg.LVApiSecret,
 	)
 
 	fileName := "audio_" + utils.RemoveSpaces(roomName) + "_" + strings.ToLower(utils.RemoveSpaces(company)) + ".ogg"
@@ -31,10 +31,10 @@ func StartTrackEgress(roomName string, company string) (string, error) {
 				Filepath: fileName,
 				Output: &livekit.EncodedFileOutput_S3{
 					S3: &livekit.S3Upload{
-						AccessKey: config.AWSAccessKey,
-						Secret:    config.AWSSecret,
-						Region:    config.AWSRegion,
-						Bucket:    config.AWSBucket,
+						AccessKey: cfg.AWSAccessKey,
+						Secret:    cfg.AWSSecret,
+						Region:    cfg.AWSRegion,
+						Bucket:    cfg.AWSBucket,
 					},
 				},
 			},
@@ -49,6 +49,19 @@ func StartTrackEgress(roomName string, company string) (string, error) {
 	fmt.Println("StartTrackEgress:", info.EgressId)
 
 	return info.EgressId, nil
+}
+
+func StopTrackEgress(egressID string) error {
+	cfg := config.GetConfig()
+	client := lksdk.NewEgressClient(cfg.LVHost, cfg.LVApiKey, cfg.LVApiSecret)
+	ctx := context.Background()
+	_, err := client.StopEgress(ctx, &livekit.StopEgressRequest{
+		EgressId: egressID,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func TrackEgressRequest(roomID string, trackID string, wsURL string) (*livekit.EgressInfo, error) {

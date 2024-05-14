@@ -30,6 +30,7 @@ type (
 		LivekitConfig
 		Webhook
 		TranscribeConfig
+		RedisConfig
 	}
 
 	// App -.
@@ -69,6 +70,11 @@ type (
 		WebhookURL      string `env:"WEBHOOK_URL" env-default:""`
 		WebhookUsername string `env:"WEBHOOK_USERNAME" env-default:""`
 		WebhookPassword string `env:"WEBHOOK_PASSWORD" env-default:""`
+	}
+
+	RedisConfig struct {
+		RedisHost string `env:"REDIS_HOST" env-default:"127.0.0.1"`
+		RedisPort string `env:"REDIS_PORT" env-default:"6379"`
 	}
 )
 
