@@ -19,7 +19,7 @@ func StartTrackEgress(roomName string, company string) (string, error) {
 		cfg.LVApiSecret,
 	)
 
-	fileName := "audio_" + utils.RemoveSpaces(roomName) + "_" + strings.ToLower(utils.RemoveSpaces(company)) + ".ogg"
+	fileName := "record/ogg/" + roomName + "/audio_" + utils.RemoveSpaces(roomName) + "_" + strings.ToLower(utils.RemoveSpaces(company)) + ".ogg"
 
 	fileRequest := &livekit.RoomCompositeEgressRequest{
 		RoomName:  roomName,
