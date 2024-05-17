@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
+	"lkrouter/pkg/mongodb/mrequests"
 	"lkrouter/pkg/redisdb"
 	"net/http"
 )
@@ -56,6 +57,12 @@ func StopEgressController(c *gin.Context) {
 	}
 
 	fmt.Println("Room metadata updated", room.Metadata)
+
+	// Update room metadata in MongoDB
+	err = mrequests.SetRecordStatus(data.Room, false)
+	if err != nil {
+		fmt.Println("Error updating room metadata in MongoDB", err)
+	}
 
 	response := EgressStopResponse{
 		Room:     data.Room,

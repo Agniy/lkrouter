@@ -45,8 +45,8 @@ type (
 	}
 
 	Mongo struct {
-		MongoDbConnection string `env:"MONGO_DB_CONNECTION"`
-		MongoDbName       string `env:"MONGO_DB_NAME"`
+		MongoDbConnection string `env:"MONGO_DB_CONNECTION" env-default:"mongodb://127.0.0.1:27017"`
+		MongoDbName       string `env:"MONGO_DB_NAME" env-default:"teleporta"`
 	}
 
 	AWSConfig struct {
