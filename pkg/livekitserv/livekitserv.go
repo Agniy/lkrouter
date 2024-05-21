@@ -65,3 +65,10 @@ func (l *LiveKitService) GetAudioTrackID(roomID string, participantID string) (s
 
 	return "", nil
 }
+
+func (l *LiveKitService) DeleteRoom(roomID string) error {
+	_, err := l.client.DeleteRoom(context.Background(), &livekit.DeleteRoomRequest{
+		Room: roomID,
+	})
+	return err
+}

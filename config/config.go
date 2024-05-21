@@ -31,6 +31,7 @@ type (
 		Webhook
 		TranscribeConfig
 		RedisConfig
+		JwtConfig
 	}
 
 	// App -.
@@ -75,6 +76,10 @@ type (
 	RedisConfig struct {
 		RedisHost string `env:"REDIS_HOST" env-default:"127.0.0.1"`
 		RedisPort string `env:"REDIS_PORT" env-default:"6379"`
+	}
+
+	JwtConfig struct {
+		JwtSecret string `env:"JWT_SECRET" env-default:"secret"`
 	}
 )
 

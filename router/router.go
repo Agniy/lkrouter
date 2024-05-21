@@ -14,6 +14,7 @@ func init() {
 	EgressRouter(r)
 	WebhookRouter(r)
 	TranscriberRouter(r)
+	CallStopRouter(r)
 }
 
 func CORSMiddleware() gin.HandlerFunc {
