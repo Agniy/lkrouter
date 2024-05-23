@@ -26,12 +26,14 @@ func CallStopController(c *gin.Context) {
 	}
 
 	// check user permission
-	if !rservice.NewAuthService().CheckRoomPermission(c, data.Room) {
+	hasPermission, err := rservice.NewAuthService().CheckRoomPermission(c, data.Room)
+	if !hasPermission {
+		fmt.Printf("User has no permission to stop room %v, error: %v \n", data.Room, err)
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
-	err := livekitserv.NewLiveKitService().DeleteRoom(data.Room)
+	err = livekitserv.NewLiveKitService().DeleteRoom(data.Room)
 	if err != nil {
 		fmt.Printf("Error stop room %v, error: %v \n", data.Room, err)
 	}

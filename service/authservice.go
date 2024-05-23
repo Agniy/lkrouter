@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"lkrouter/pkg/mongodb/mrequests"
@@ -22,23 +23,24 @@ func (a *AuthService) ParseToken(tokenString string) (jwt.MapClaims, error) {
 	return a.jwtService.ParseToken(tokenString)
 }
 
-func (a *AuthService) CheckRoomPermission(c *gin.Context, room string) bool {
+func (a *AuthService) CheckRoomPermission(c *gin.Context, room string) (bool, error) {
 	authHeader := c.Request.Header.Get("Authorization")
 	token := strings.TrimSpace(strings.TrimLeft(authHeader, "Bearer"))
 
 	claims, err := a.ParseToken(token)
+	fmt.Printf("Claims: %v \n", claims)
 	if err != nil {
-		return false
+		return false, err
 	}
 	uid, ok := claims["uid"]
 	if !ok {
-		return false
+		return false, fmt.Errorf("Uid not found in token")
 	}
 
 	// get room from db and check if uid has permission
 	call, err := mrequests.GetCallByRoom(room)
 	if err != nil {
-		return false
+		return false, err
 	}
 
 	// check if uid is initiator
@@ -48,8 +50,8 @@ func (a *AuthService) CheckRoomPermission(c *gin.Context, room string) bool {
 	}
 
 	if initiator == uid {
-		return true
+		return true, nil
 	}
 
-	return false
+	return false, fmt.Errorf("Initiator is %v != user %v has no permission to room %v", uid, initiator, room)
 }
