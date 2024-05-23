@@ -28,13 +28,12 @@ func (a *AuthService) CheckRoomPermission(c *gin.Context, room string) (bool, er
 	token := strings.TrimSpace(strings.TrimLeft(authHeader, "Bearer"))
 
 	claims, err := a.ParseToken(token)
-	fmt.Printf("Claims: %v \n", claims)
 	if err != nil {
 		return false, err
 	}
-	uid, ok := claims["uid"]
+	uid, ok := claims["sub"]
 	if !ok {
-		return false, fmt.Errorf("Uid not found in token")
+		return false, fmt.Errorf("sub not found in token")
 	}
 
 	// get room from db and check if uid has permission
