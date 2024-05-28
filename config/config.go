@@ -43,6 +43,7 @@ type (
 		Port              string `env:"PORT" env-default:"8090"`
 		CertPath          string `env:"CERT_PATH" env-default:""`
 		KeyPath           string `env:"KEY_PATH" env-default:""`
+		CorsSite          string `env:"CORS_SITE" env-default:"https://teleporta.me"`
 	}
 
 	Mongo struct {
