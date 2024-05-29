@@ -2,6 +2,7 @@ package mrequests
 
 import (
 	"context"
+	"fmt"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -30,6 +31,26 @@ func GetCallByRoom(room string) (bson.M, error) {
 	return call, err
 }
 
+func UpdateTranscribeTextStatus(room string, status string) error {
+	//update mongo calls item
+	mongoClient, err := mongodb.GetMongoClient()
+	if err == nil {
+		ctx := context.Background()
+		callsCollection := mongoClient.Database("teleporta").Collection("calls")
+
+		_, err = callsCollection.UpdateOne(ctx, bson.D{{"url", room}}, bson.D{
+			{"$set", bson.D{{
+				"file_transcribe_status",
+				status}}}})
+
+		if err != nil {
+			fmt.Printf("Can't update transcribe text status %v for room %v! \n", status, room)
+		}
+		fmt.Printf("Update transcribe text status for room %v! \n", room)
+	}
+	return err
+}
+
 func UpdateCallByBsonFilter(filter bson.M, actions bson.M) error {
 	mongoClient, errClient := mongodb.GetMongoClient()
 	if errClient == nil {
@@ -51,4 +72,27 @@ func SetRecordStatus(room string, status bool) error {
 		return err
 	}
 	return errClient
+}
+
+func UpdateTranscribeText(room string, textData []map[string]interface{}) error {
+	//update mongo calls item
+	mongoClient, err := mongodb.GetMongoClient()
+	if err == nil {
+		ctx := context.Background()
+		callsCollection := mongoClient.Database("teleporta").Collection("calls")
+
+		_, err = callsCollection.UpdateOne(ctx, bson.D{{"url", room}}, bson.D{
+			{"$set", bson.D{{
+				"transcrib_rec",
+				textData}}},
+			{"$set", bson.D{{
+				"file_transcribe_status",
+				"success"}}}})
+
+		if err != nil {
+			fmt.Printf("Can't update transcribe text %v for room %v! \n", textData, room)
+		}
+		fmt.Printf("Update transcribe text for room %v! \n", room)
+	}
+	return err
 }

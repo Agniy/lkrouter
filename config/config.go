@@ -32,6 +32,7 @@ type (
 		TranscribeConfig
 		RedisConfig
 		JwtConfig
+		Openai
 	}
 
 	// App -.
@@ -44,6 +45,7 @@ type (
 		CertPath          string `env:"CERT_PATH" env-default:""`
 		KeyPath           string `env:"KEY_PATH" env-default:""`
 		CorsSite          string `env:"CORS_SITE" env-default:"https://teleporta.me"`
+		TmpFilesPath      string `env:"TMP_FILES_PATH" default:"/home/ec2-user/projects/files/"`
 	}
 
 	Mongo struct {
@@ -81,6 +83,10 @@ type (
 
 	JwtConfig struct {
 		JwtSecret string `env:"JWT_SECRET" env-default:"secret"`
+	}
+
+	Openai struct {
+		OpenaiApiKey string `env:"OPENAI_API_KEY"`
 	}
 )
 

@@ -63,7 +63,7 @@ func IsRoomActive(roomUrl string) (bool, error) {
 
 // UpdateCallStt
 // sttAddMilliseconds - in miliseeconds
-func UpdateCallStt(roomUrl string, uid string, sttAddMilliseconds int32) error {
+func UpdateCallStt(roomUrl string, sttAddMilliseconds int32) error {
 	logger := logrus.New()
 	//update mongo call
 	mongoClient, errClient := mongodb.GetMongoClient()
@@ -75,7 +75,6 @@ func UpdateCallStt(roomUrl string, uid string, sttAddMilliseconds int32) error {
 			bson.M{"url": roomUrl},
 			bson.D{
 				{"$inc", bson.D{
-					{"stt_users." + uid, sttAddMilliseconds},
 					{"stt_total", sttAddMilliseconds},
 				},
 				},
@@ -122,7 +121,7 @@ func UpdateCompanyStt(companyId string, sttAddSeconds int32) error {
 // UpdateCompanySttStatsByRoom
 // update company and call stt
 // sttAddMilliseconds - time in milliseconds
-func UpdateCompanySttStatsByRoom(roomUrl string, uid string, sttAddMilliseconds int32) error {
+func UpdateCompanySttStatsByRoom(roomUrl string, sttAddMilliseconds int32) error {
 	logger := logrus.New()
 	call, err := GetCallByRoom(roomUrl)
 	if err != nil {
@@ -135,7 +134,7 @@ func UpdateCompanySttStatsByRoom(roomUrl string, uid string, sttAddMilliseconds 
 	}
 
 	//update call stt
-	err = UpdateCallStt(roomUrl, uid, sttAddMilliseconds)
+	err = UpdateCallStt(roomUrl, sttAddMilliseconds)
 	if err != nil {
 		logger.Infof("Error when try to update call stt_total")
 	}
@@ -150,5 +149,23 @@ func UpdateCompanySttStatsByRoom(roomUrl string, uid string, sttAddMilliseconds 
 		logger.Infof("UpdateCompanyStt success for company: %v with sumSttCurrent: %v", companyId, addSttSeconds)
 	}
 
+	return nil
+}
+
+// CheckCompanySttLimit	- check if company stt limit is reached
+// sttAdd - in seconds
+// companyId - company id
+func CheckCompanySttLimit(companyId string, sttAdd int32) error {
+	logger := logrus.New()
+	company, err := GetCompany(companyId)
+	if err != nil {
+		logger.Infof("Error when try to get company by call %v \n", companyId)
+		return err
+	}
+	sttLimit := company["sttLimit"].(int32) * 60
+	sttCurrent := company["sttCurrent"].(int32)
+	if sttCurrent+sttAdd > sttLimit {
+		return fmt.Errorf("sttCurrent %v + sttAdd %v > sttLimit %v", sttCurrent, sttAdd, sttLimit)
+	}
 	return nil
 }
