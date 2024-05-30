@@ -32,7 +32,11 @@ func transcriberPutWorker(id int, jobs <-chan map[string]interface{}) {
 		logger.Println("transcriberPutWorker message: ", id, " - started  job with data:", jMap)
 
 		room, rfound := jMap["room"]
-		lang, _ := jMap["lang"]
+		lang, lFound := jMap["lang"]
+		if !lFound {
+			lang = ""
+		}
+
 		transcriberType, tfound := jMap["type"]
 		prompt, pFound := jMap["prompt"]
 		if !rfound || !tfound {
