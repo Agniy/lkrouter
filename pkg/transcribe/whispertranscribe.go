@@ -278,7 +278,7 @@ func (t *OpenAiTranscribe) DownloadAudioFile(fileUrl string) (string, error) {
 
 	// Create a new file in the current directory
 	fileName := uuid.New().String() + ".mp3"
-	filePath := cfg.TmpFilesPath + fileName
+	filePath := cfg.TmpFilesPath + "/" + fileName
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err

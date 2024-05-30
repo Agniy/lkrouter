@@ -45,7 +45,7 @@ type (
 		CertPath          string `env:"CERT_PATH" env-default:""`
 		KeyPath           string `env:"KEY_PATH" env-default:""`
 		CorsSite          string `env:"CORS_SITE" env-default:"https://teleporta.me"`
-		TmpFilesPath      string `env:"TMP_FILES_PATH" default:"/home/ec2-user/projects/files/"`
+		TmpFilesPath      string `env:"TMP_FILES_PATH" env-default:"/home/ec2-user/projects/files"`
 	}
 
 	Mongo struct {
