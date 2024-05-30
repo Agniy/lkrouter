@@ -64,11 +64,6 @@ func WhisperTranscribeFileController(c *gin.Context) {
 		response["message"] = "Transcribe is in progress"
 		c.JSON(http.StatusOK, response)
 		return
-	} else if call["file_transcribe_status"] == STATUS_SUCCESS {
-		response["status"] = STATUS_SUCCESS
-		response["message"] = "Transcribe is success"
-		c.JSON(http.StatusOK, response)
-		return
 	} else {
 		transcribe.SendWorkTask(map[string]interface{}{
 			"room":   transcribeData.Room,
