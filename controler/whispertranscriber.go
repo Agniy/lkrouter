@@ -9,8 +9,9 @@ import (
 )
 
 type TranscribeFileData struct {
-	Room string `json:"room"`
-	Lang string `json:"lang"`
+	Room   string `json:"room"`
+	Lang   string `json:"lang"`
+	Prompt string `json:"prompt"`
 }
 
 const (
@@ -70,9 +71,9 @@ func WhisperTranscribeFileController(c *gin.Context) {
 		return
 	} else {
 		transcribe.SendWorkTask(map[string]interface{}{
-			"room": transcribeData.Room,
-			"lang": transcribeData.Lang,
-			"type": "whisper",
+			"room":   transcribeData.Room,
+			"prompt": transcribeData.Prompt,
+			"type":   "whisper",
 		})
 		response["status"] = STATUS_PROGRESS
 		response["message"] = "Transcribe is in progress"
