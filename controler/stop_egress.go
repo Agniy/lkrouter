@@ -42,7 +42,7 @@ func StopEgressController(c *gin.Context) {
 	}
 
 	// save to redis db
-	err = redisdb.SetRoomRecordStatus(data.Room, "stopped", 10*time.Minute)
+	err = redisdb.SetRoomRecordStatus(data.Room, "stopping", 10*time.Minute)
 	if err != nil {
 		fmt.Println("Error saving egress ID to redis", err)
 	}
