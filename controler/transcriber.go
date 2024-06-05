@@ -15,7 +15,7 @@ type TranscriberData struct {
 func TranscriberStartController(c *gin.Context) {
 	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithError(500, err)
 		return
 	}
 
@@ -45,7 +45,7 @@ func TranscriberStartController(c *gin.Context) {
 func TranscriberStopController(c *gin.Context) {
 	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
-		c.AbortWithError(400, err)
+		c.AbortWithError(500, err)
 		return
 	}
 
