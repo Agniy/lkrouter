@@ -57,7 +57,8 @@ func StopEgressController(c *gin.Context) {
 
 	// update room metadata
 	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
-		"rec": false,
+		"rec":        false,
+		"rec-status": "stopping",
 	})
 	if err != nil {
 		fmt.Println("Error updating room metadata", err)

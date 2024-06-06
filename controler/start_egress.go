@@ -59,7 +59,8 @@ func StartEgressController(c *gin.Context) {
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
 
 	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
-		"rec": true,
+		"rec":        true,
+		"rec-status": "started",
 	})
 
 	if err != nil {
