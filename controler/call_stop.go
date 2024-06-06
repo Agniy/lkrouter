@@ -1,11 +1,14 @@
 package controler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"lkrouter/domain"
 	"lkrouter/pkg/livekitserv"
 	rservice "lkrouter/service"
 	"net/http"
+	"time"
 )
 
 type CallStopData struct {
@@ -33,11 +36,19 @@ func CallStopController(c *gin.Context) {
 		return
 	}
 
-	err = livekitserv.NewLiveKitService().DeleteRoom(data.Room)
-	if err != nil {
-		fmt.Printf("Error stop room %v, error: %v \n", data.Room, err)
-	}
-	fmt.Printf("Room %v stopped \n", data.Room)
+	// Send message to all participants in the room
+	msg, _ := json.Marshal(domain.RoomActionMessage{Action: "roomStop"})
+	err = livekitserv.NewLiveKitService().SendMessageToParticipants(
+		data.Room, msg, "room_action")
+
+	// Call DeleteRoom after a delay of 3 seconds
+	time.AfterFunc(3*time.Second, func() {
+		err = livekitserv.NewLiveKitService().DeleteRoom(data.Room)
+		if err != nil {
+			fmt.Printf("Error stop room %v, error: %v \n", data.Room, err)
+		}
+		fmt.Printf("Room %v stopped \n", data.Room)
+	})
 
 	response := CallStopResponse{
 		Room:   data.Room,
