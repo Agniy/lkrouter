@@ -192,6 +192,8 @@ func (t *OpenAiTranscribe) WhisperFileTranscribe() {
 		formatedResult, summDuration = t.processSmallFile(filePath, formatedResult, summDuration)
 	}
 
+	t.logger.Infof("Whisper transcription end summDuration is : %v", summDuration)
+
 	//remove mp3 file
 	err = os.Remove(filePath)
 	if err != nil {
