@@ -61,6 +61,35 @@ func IsRoomActive(roomUrl string) (bool, error) {
 	return false, err
 }
 
+// UpdateFileCallStt
+// sttAddMilliseconds - in miliseeconds
+func UpdateCallFileStt(roomUrl string, sttAddMilliseconds int32) error {
+	logger := logrus.New()
+	//update mongo call
+	mongoClient, errClient := mongodb.GetMongoClient()
+	if errClient == nil {
+		ctx := context.Background()
+		callsCollection := mongoClient.Database("teleporta").Collection("calls")
+		result, err := callsCollection.UpdateOne(
+			ctx,
+			bson.M{"url": roomUrl},
+			bson.D{
+				{"$inc", bson.D{
+					{"file_stt_total", sttAddMilliseconds},
+				},
+				},
+			},
+		)
+		if err != nil {
+			logger.Infof("error when try to UpdateCompanyFilesSum: %v", err)
+			return err
+		}
+		logger.Infof("Updated %v Documents! \n", result.ModifiedCount)
+	}
+
+	return errClient
+}
+
 // UpdateCallStt
 // sttAddMilliseconds - in miliseeconds
 func UpdateCallStt(roomUrl string, sttAddMilliseconds int32) error {
@@ -90,6 +119,35 @@ func UpdateCallStt(roomUrl string, sttAddMilliseconds int32) error {
 	return errClient
 }
 
+// UpdateCompanyFileStt
+// sttAddMilliseconds - in seconds
+func UpdateCompanyFileStt(companyId string, sttAddSeconds int32) error {
+	logger := logrus.New()
+	//update mongo call
+	mongoClient, errClient := mongodb.GetMongoClient()
+	if errClient == nil {
+		ctx := context.Background()
+		callsCollection := mongoClient.Database("teleporta").Collection("company")
+		result, err := callsCollection.UpdateOne(
+			ctx,
+			bson.M{"companyId": companyId},
+			bson.D{
+				{"$inc", bson.D{
+					{"fileSttCurrent", sttAddSeconds},
+				},
+				},
+			},
+		)
+		if err != nil {
+			logger.Infof("error when try to UpdateCompanyFilesSum: %v", err)
+			return err
+		}
+		logger.Infof("Updated %v Documents! \n", result.ModifiedCount)
+	}
+	return errClient
+
+}
+
 // UpdateCompanyStt
 // sttAddMilliseconds - in seconds
 func UpdateCompanyStt(companyId string, sttAddSeconds int32) error {
@@ -116,6 +174,40 @@ func UpdateCompanyStt(companyId string, sttAddSeconds int32) error {
 		logger.Infof("Updated %v Documents! \n", result.ModifiedCount)
 	}
 	return errClient
+}
+
+// UpdateCompanyFileSttStatsByRoom
+// update company and call file stt
+// sttAddMilliseconds - time in milliseconds
+func UpdateCompanyFileSttStatsByRoom(roomUrl string, sttAddMilliseconds int32) error {
+	logger := logrus.New()
+	call, err := GetCallByRoom(roomUrl)
+	if err != nil {
+		logger.Infof("Error when try to get room %v \n", roomUrl)
+		return err
+	}
+
+	if call["companyId"] == nil {
+		return fmt.Errorf("call for %v has not companyId", call["_id"])
+	}
+
+	//update call stt
+	err = UpdateCallFileStt(roomUrl, sttAddMilliseconds)
+	if err != nil {
+		logger.Infof("Error when try to update call stt_total")
+	}
+
+	companyId := call["companyId"].(string)
+	addSttSeconds := int32(math.Round(float64(sttAddMilliseconds) / 1000))
+	err = UpdateCompanyFileStt(companyId, addSttSeconds)
+	if err != nil {
+		logger.Infof("UpdateCompanyStt error for company: %v with error: %v", companyId, err)
+		return err
+	} else {
+		logger.Infof("UpdateCompanyStt success for company: %v with sumSttCurrent: %v", companyId, addSttSeconds)
+	}
+
+	return nil
 }
 
 // UpdateCompanySttStatsByRoom

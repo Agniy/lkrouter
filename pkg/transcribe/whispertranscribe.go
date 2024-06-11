@@ -200,7 +200,7 @@ func (t *OpenAiTranscribe) WhisperFileTranscribe() {
 		t.logger.Errorf("Failed to remove audio file: %v", err)
 	}
 
-	err = mrequests.UpdateCompanySttStatsByRoom(t.room, summDuration)
+	err = mrequests.UpdateCompanyFileSttStatsByRoom(t.room, summDuration*1000)
 	if err != nil {
 		t.logger.Errorf("Failed to update company stt stats: %v", err)
 	}
