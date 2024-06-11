@@ -8,6 +8,7 @@ import (
 	"lkrouter/pkg/mongodb/mrequests"
 	"lkrouter/pkg/redisdb"
 	"net/http"
+	"time"
 )
 
 type EgressStopData struct {
@@ -40,6 +41,12 @@ func StopEgressController(c *gin.Context) {
 		return
 	}
 
+	// save to redis db
+	err = redisdb.SetRoomRecordStatus(data.Room, "stopping", 10*time.Minute)
+	if err != nil {
+		fmt.Println("Error saving egress ID to redis", err)
+	}
+
 	// remove from redis db
 	err = redisdb.Del("room_egress_" + data.Room)
 	if err != nil {
@@ -50,7 +57,8 @@ func StopEgressController(c *gin.Context) {
 
 	// update room metadata
 	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
-		"rec": false,
+		"rec":        false,
+		"rec-status": "stopping",
 	})
 	if err != nil {
 		fmt.Println("Error updating room metadata", err)

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"lkrouter/config"
+	"lkrouter/pkg/livekitserv"
+	"lkrouter/pkg/redisdb"
 	"lkrouter/utils"
 	"log"
 	"time"
@@ -29,6 +31,21 @@ func RecordEndedController(c *gin.Context) {
 		c.AbortWithError(400, err)
 		return
 	}
+
+	//set record status to "stopped"
+	err := redisdb.SetRoomRecordStatus(data.Room, "stopped", 10*time.Minute)
+	if err != nil {
+		fmt.Println("Error saving record status to redis", err)
+	}
+
+	_, err = livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
+		"rec":        false,
+		"rec-status": "stopped",
+	})
+	if err != nil {
+		fmt.Println("Error updating room metadata", err)
+	}
+
 	data.Timestamp = fmt.Sprintf("%d", time.Now().Unix())
 	data.HashCode = utils.EncryptAuthData(cfg.WebhookUsername, cfg.WebhookPassword, data.Timestamp)
 	data.Event = "recordUrl"

@@ -22,12 +22,28 @@ type EgressStartResponse struct {
 	EgressID string `json:"egressID"`
 }
 
+func IfRoomRecordStatusIsStopped(room string) bool {
+	recordStatus, err := redisdb.GetRoomRecordStatus(room)
+	if err != nil {
+		fmt.Println("Error getting record status from redis", err)
+		return true
+	}
+	return recordStatus == "stopped"
+}
+
 func StartEgressController(c *gin.Context) {
 	data := EgressStartData{}
 	if err := c.BindJSON(&data); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+
+	//check if room record status is stopped
+	if !IfRoomRecordStatusIsStopped(data.Room) {
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Room record status is not stopped"})
+		return
+	}
+
 	egressId, err := egresserv.StartTrackEgress(data.Room, data.Company)
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
@@ -43,7 +59,8 @@ func StartEgressController(c *gin.Context) {
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
 
 	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
-		"rec": true,
+		"rec":        true,
+		"rec-status": "started",
 	})
 
 	if err != nil {

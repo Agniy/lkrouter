@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go/v2"
+	"github.com/sirupsen/logrus"
 	"lkrouter/config"
 )
 
@@ -12,11 +13,13 @@ func NewLiveKitService() *LiveKitService {
 	cfg := config.GetConfig()
 	return &LiveKitService{
 		client: lksdk.NewRoomServiceClient(cfg.LVHost, cfg.LVApiKey, cfg.LVApiSecret),
+		logger: logrus.New(),
 	}
 }
 
 type LiveKitService struct {
 	client *lksdk.RoomServiceClient
+	logger *logrus.Logger
 }
 
 func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]interface{}) (*livekit.Room, error) {
@@ -71,4 +74,19 @@ func (l *LiveKitService) DeleteRoom(roomID string) error {
 		Room: roomID,
 	})
 	return err
+}
+
+func (l *LiveKitService) SendMessageToParticipants(roomID string, message []byte, topicName string) error {
+	sendResponse, err := l.client.SendData(context.Background(), &livekit.SendDataRequest{
+		Room:  roomID,
+		Data:  message,
+		Topic: &topicName,
+	})
+	if err != nil {
+		return err
+	}
+
+	l.logger.Infof("Send message to participant %s in room %s, response: %v", roomID, sendResponse)
+
+	return nil
 }
