@@ -7,6 +7,9 @@ import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 	"github.com/sirupsen/logrus"
 	"lkrouter/config"
+	"log"
+	"os"
+	"strings"
 )
 
 func NewLiveKitService() *LiveKitService {
@@ -89,4 +92,37 @@ func (l *LiveKitService) SendMessageToParticipants(roomID string, message []byte
 	l.logger.Infof("Send message to participant %s in room %s, response: %v", roomID, sendResponse)
 
 	return nil
+}
+
+func (l *LiveKitService) GetRoomParticipants(roomID string) (*livekit.ListParticipantsResponse, error) {
+	ctx := context.Background()
+	req := &livekit.ListParticipantsRequest{
+		Room: roomID,
+	}
+	roomParticipants, err := l.client.ListParticipants(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return roomParticipants, nil
+}
+
+func (l *LiveKitService) RealParticipantsByRoom(roomID string) ([]*livekit.ParticipantInfo, error) {
+	logger := log.New(os.Stdout, "ListParticipantsByRoom: ", 0)
+
+	roomResponse, err := l.GetRoomParticipants(roomID)
+	if err != nil {
+		logger.Println("Error when try ListParticipantsByRoom: ", err)
+		return nil, err
+	}
+
+	// If there are no real participants in the room, close it.
+	activeParticipants := []*livekit.ParticipantInfo{}
+	for _, participant := range roomResponse.Participants {
+		if participant.Identity != "chat-agent" && !strings.HasPrefix(participant.Identity, "EG_") {
+			activeParticipants = append(activeParticipants, participant)
+		}
+	}
+
+	return activeParticipants, nil
 }

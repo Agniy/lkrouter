@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
 )
 
@@ -34,13 +35,6 @@ func RoomActionController(c *gin.Context) {
 		return
 	}
 
-	call, err := mrequests.GetCallByRoom(data.Room)
-	if err != nil {
-		c.AbortWithError(500, err)
-		return
-	}
-
-	uids := call["uids"].([]string)
 	publishAction := ""
 	sttForAll := false
 	if data.Action == "start" {
@@ -52,7 +46,7 @@ func RoomActionController(c *gin.Context) {
 
 	//update call field stt_for_all and stt_for_all_lang
 	// --------------------------------------------
-	err = mrequests.UpdateCallByBsonFilter(bson.M{
+	err := mrequests.UpdateCallByBsonFilter(bson.M{
 		"url": data.Room,
 	}, bson.M{
 		"$set": bson.M{
@@ -66,12 +60,19 @@ func RoomActionController(c *gin.Context) {
 	}
 	// --------------------------------------------
 
+	lkServ := livekitserv.NewLiveKitService()
+	userList, err := lkServ.RealParticipantsByRoom(data.Room)
+	if err != nil {
+		logger.Errorf("Error in RealParticipantsByRoom: %v", err)
+	}
+
 	// get uids from call and switch on action (start/stop) for each user
-	for i := range uids {
-		uid := uids[i]
+	for i := range userList {
+		uInfo := userList[i]
+		uid := uInfo.Identity
 		logger.Printf("Start transcriber for uid: %v", uid)
 		if publishAction == "sttForAllStart" {
-			_, err := StartTranscriberAction(&TranscriberData{
+			_, err = StartTranscriberAction(&TranscriberData{
 				Room: data.Room,
 				Lang: data.Lang.Code,
 				Uid:  uid,
@@ -80,7 +81,7 @@ func RoomActionController(c *gin.Context) {
 				logger.Errorf("Error in StartTranscriberAction: %v for uid: %v", err, uid)
 			}
 		} else if publishAction == "sttForAllStop" {
-			_, err := StopTranscriberAction(data.Room, uid)
+			_, err = StopTranscriberAction(data.Room, uid)
 			if err != nil {
 				logger.Errorf("Error in StopTranscriberAction: %v for uid: %v", err, uid)
 			}
