@@ -15,7 +15,7 @@ type TranscribeReq struct {
 	ParticipantId string `json:"participantId"`
 }
 
-func (tr *TranscribeReq) TranscriberAction(action string) (TranscribeReq, error) {
+func (tr *TranscribeReq) TranscriberAction(action string) (*TranscribeReq, error) {
 	cfg := config.GetConfig()
 	jsonData, err := json.Marshal(tr)
 	if err != nil {
@@ -31,8 +31,8 @@ func (tr *TranscribeReq) TranscriberAction(action string) (TranscribeReq, error)
 	var transcriberResponse TranscribeReq
 	err = json.NewDecoder(resp.Body).Decode(&transcriberResponse)
 	if err != nil {
-		return TranscribeReq{}, err
+		return &TranscribeReq{}, err
 	}
 
-	return transcriberResponse, nil
+	return &transcriberResponse, nil
 }
