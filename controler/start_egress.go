@@ -3,6 +3,7 @@ package controler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"lkrouter/domain"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
@@ -40,7 +41,18 @@ func StartEgressController(c *gin.Context) {
 
 	//check if room record status is stopping
 	if IfRoomRecordStatusIsStopping(data.Room) {
-		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Room record status is not stopped"})
+		c.JSON(http.StatusMethodNotAllowed, gin.H{
+			"error": "Room record status is not stopped",
+			"notifications": []domain.RoomHttpNotification{
+				{
+					MsgCode:  "RECORD_NOT_READY_ERROR",
+					Type:     "error",
+					Head:     "Record is processing, please wait",
+					Msg:      "Processing previous rec part, please try again later(if record is big more time needed)",
+					Infinite: true,
+				},
+			},
+		})
 		return
 	}
 
