@@ -51,7 +51,7 @@ func StartTrackEgress(roomName string, company string) (string, error) {
 	return info.EgressId, nil
 }
 
-func StopTrackEgress(egressID string) error {
+func StopTrackEgress(egressID string) (*livekit.EgressInfo, error) {
 	cfg := config.GetConfig()
 	client := lksdk.NewEgressClient(cfg.LVHost, cfg.LVApiKey, cfg.LVApiSecret)
 	ctx := context.Background()
@@ -59,12 +59,12 @@ func StopTrackEgress(egressID string) error {
 		EgressId: egressID,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	fmt.Printf("Egress stopped: %+v \n", eggressInfo)
 
-	return nil
+	return eggressInfo, nil
 }
 
 func TrackEgressRequest(roomID string, trackID string, wsURL string) (*livekit.EgressInfo, error) {

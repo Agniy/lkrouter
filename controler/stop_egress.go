@@ -3,6 +3,7 @@ package controler
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/livekit/protocol/livekit"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
@@ -35,16 +36,18 @@ func StopEgressController(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 	}
 
-	err = egresserv.StopTrackEgress(egressId.(string))
+	eggressInfo, err := egresserv.StopTrackEgress(egressId.(string))
 	if err != nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return
 	}
 
-	// save to redis db
-	err = redisdb.SetRoomRecordStatus(data.Room, "stopping", 10*time.Minute)
-	if err != nil {
-		fmt.Println("Error saving egress ID to redis", err)
+	// save to redis db only if get status is ending
+	if eggressInfo.Status == livekit.EgressStatus_EGRESS_ENDING {
+		err = redisdb.SetRoomRecordStatus(data.Room, "stopping", 1*time.Minute)
+		if err != nil {
+			fmt.Println("Error saving egress ID to redis", err)
+		}
 	}
 
 	// remove from redis db
