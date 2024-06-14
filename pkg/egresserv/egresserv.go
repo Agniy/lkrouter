@@ -55,12 +55,15 @@ func StopTrackEgress(egressID string) error {
 	cfg := config.GetConfig()
 	client := lksdk.NewEgressClient(cfg.LVHost, cfg.LVApiKey, cfg.LVApiSecret)
 	ctx := context.Background()
-	_, err := client.StopEgress(ctx, &livekit.StopEgressRequest{
+	eggressInfo, err := client.StopEgress(ctx, &livekit.StopEgressRequest{
 		EgressId: egressID,
 	})
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Egress stopped: %+v \n", eggressInfo)
+
 	return nil
 }
 
