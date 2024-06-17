@@ -91,8 +91,8 @@ type (
 	}
 
 	AwsLogsConfig struct {
-		AwsLogRegion    string `env:"AWS_REGION" envDefault:"eu-central-1"`
-		AwsLogGroupName string `env:"AWS_LOG_GROUP_NAME" envDefault:"lkrouter"`
+		AwsLogRegion    string `env:"AWS_REGION" env-default:"eu-central-1"`
+		AwsLogGroupName string `env:"AWS_LOG_GROUP_NAME" env-default:"lkrouter-prod"`
 	}
 )
 
