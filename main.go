@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"lkrouter/config"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/transcribe"
 	"lkrouter/router"
 	"net/http"
@@ -19,6 +20,20 @@ func main() {
 	//start transcriber workers
 	transcribeWorkChan := transcribe.InitFileTranscribeWorkers()
 	SetupCloseHandler(transcribeWorkChan)
+
+	// Init AWS logs
+	// ------------------------------------
+	cwl, err := awslogs.GetCwl()
+	if err != nil {
+		fmt.Println("Can't get cwl", err)
+	} else {
+		go cwl.ProcessQueue()
+	}
+
+	if cwl != nil {
+		cwl.Add("Lkrouter started.")
+	}
+	// ------------------------------------
 
 	r := router.GetRouter()
 	httpAddr := ":" + cfg.Port

@@ -33,6 +33,7 @@ type (
 		RedisConfig
 		JwtConfig
 		Openai
+		AwsLogsConfig
 	}
 
 	// App -.
@@ -87,6 +88,11 @@ type (
 
 	Openai struct {
 		OpenaiApiKey string `env:"OPENAI_API_KEY"`
+	}
+
+	AwsLogsConfig struct {
+		AwsLogRegion    string `env:"AWS_REGION" envDefault:"eu-central-1"`
+		AwsLogGroupName string `env:"AWS_LOG_GROUP_NAME" envDefault:"lkrouter"`
 	}
 )
 
