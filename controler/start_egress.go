@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"lkrouter/domain"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
@@ -86,6 +87,12 @@ func StartEgressController(c *gin.Context) {
 	}
 
 	fmt.Println("Room metadata updated", room.Metadata)
+
+	awslogs.AddSLog(map[string]string{
+		"func":    "StartEgressController",
+		"message": "Record successful started, egressId: " + egressId,
+		"room":    data.Room,
+	})
 
 	response := EgressStartResponse{
 		Room:     data.Room,

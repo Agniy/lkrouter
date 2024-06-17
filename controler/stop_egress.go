@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/livekit/protocol/livekit"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/egresserv"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
@@ -74,6 +75,12 @@ func StopEgressController(c *gin.Context) {
 	if err != nil {
 		fmt.Println("Error updating room metadata in MongoDB", err)
 	}
+
+	awslogs.AddSLog(map[string]string{
+		"func":    "StopEgressController",
+		"message": "Record successful stopped, egressId: " + egressId.(string),
+		"room":    data.Room,
+	})
 
 	response := EgressStopResponse{
 		Room:     data.Room,
