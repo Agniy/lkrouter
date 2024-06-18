@@ -92,6 +92,7 @@ func StartEgressController(c *gin.Context) {
 		"func":    "StartEgressController",
 		"message": "Record successful started, egressId: " + egressId,
 		"room":    data.Room,
+		"type":    awslogs.MsgTypeInfo,
 	})
 
 	response := EgressStartResponse{

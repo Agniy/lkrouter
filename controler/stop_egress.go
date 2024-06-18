@@ -80,6 +80,7 @@ func StopEgressController(c *gin.Context) {
 		"func":    "StopEgressController",
 		"message": "Record successful stopped, egressId: " + egressId.(string),
 		"room":    data.Room,
+		"type":    awslogs.MsgTypeInfo,
 	})
 
 	response := EgressStopResponse{

@@ -14,8 +14,16 @@ import (
 	"time"
 )
 
+const (
+	// LogTypes for log messages
+	MsgTypeInfo  = "info"
+	MsgTypeError = "error"
+	MsgTypeWarn  = "warning"
+)
+
 type CwlLogMessage struct {
 	Func      string `json:"func"`
+	Type      string `json:"type"`
 	Message   string `json:"message"`
 	Room      string `json:"room"`
 	Uid       string `json:"uid"`
@@ -258,6 +266,7 @@ func AddSLog(mes map[string]string) {
 			Message: mes["message"],
 			Room:    mes["room"],
 			Uid:     mes["uid"],
+			Type:    mes["type"],
 		})
 	}
 }
