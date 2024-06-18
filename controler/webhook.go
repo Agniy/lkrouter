@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"lkrouter/config"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/redisdb"
 	"lkrouter/utils"
@@ -28,6 +29,13 @@ func RecordEndedController(c *gin.Context) {
 	cfg := config.GetConfig()
 	data := RecordEndedData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RecordEndedController",
+			"message": fmt.Sprintf("Error binding json to RecordEndedData: %v", err),
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(400, err)
 		return
 	}
@@ -35,7 +43,12 @@ func RecordEndedController(c *gin.Context) {
 	//set record status to "stopped"
 	err := redisdb.SetRoomRecordStatus(data.Room, "stopped", 10*time.Minute)
 	if err != nil {
-		fmt.Println("Error saving record status to redis", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "RecordEndedController",
+			"message": fmt.Sprintf("Redis Error saving record status: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 
 	_, err = livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
@@ -43,7 +56,12 @@ func RecordEndedController(c *gin.Context) {
 		"rec-status": "stopped",
 	})
 	if err != nil {
-		fmt.Println("Error updating room metadata", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "RecordEndedController",
+			"message": fmt.Sprintf("Error updating room metadata: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 
 	data.Timestamp = fmt.Sprintf("%d", time.Now().Unix())
@@ -54,6 +72,14 @@ func RecordEndedController(c *gin.Context) {
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RecordEndedController",
+			"message": fmt.Sprintf("Error marshalling data: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+
 		c.AbortWithError(400, err)
 		return
 	}
@@ -61,6 +87,14 @@ func RecordEndedController(c *gin.Context) {
 	log.Printf("Get data about ended record: %s", data)
 	err = utils.SendWebhookData(jsonData, cfg.WebhookURL, cfg.WebhookUsername, cfg.WebhookPassword)
 	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RecordEndedController",
+			"message": fmt.Sprintf("Error sending webhook data: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}

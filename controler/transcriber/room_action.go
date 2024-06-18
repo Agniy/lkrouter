@@ -1,9 +1,11 @@
 package transcriber
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
 )
@@ -31,6 +33,13 @@ func RoomActionController(c *gin.Context) {
 	logger := logrus.New()
 	data := RoomActionData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RoomActionController",
+			"message": "Error binding json to RoomActionData",
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}
@@ -56,14 +65,25 @@ func RoomActionController(c *gin.Context) {
 		}})
 
 	if err != nil {
-		logger.Println("Error when try update call stt_for_all by url: ", err)
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RoomActionController",
+			"message": fmt.Sprintf("MongoDB error in UpdateCallByBsonFilter: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 	// --------------------------------------------
 
 	lkServ := livekitserv.NewLiveKitService()
 	userList, err := lkServ.RealParticipantsByRoom(data.Room)
 	if err != nil {
-		logger.Errorf("Error in RealParticipantsByRoom: %v", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "RoomActionController",
+			"message": fmt.Sprintf("Livekit error in RealParticipantsByRoom: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 
 	// get uids from call and switch on action (start/stop) for each user
@@ -78,12 +98,22 @@ func RoomActionController(c *gin.Context) {
 				Uid:  uid,
 			})
 			if err != nil {
-				logger.Errorf("Error in StartTranscriberAction: %v for uid: %v", err, uid)
+				awslogs.AddSLog(map[string]string{
+					"func":    "RoomActionController",
+					"message": fmt.Sprintf("Error in StartTranscriberAction: %v, with data: %+v", err, data),
+					"type":    awslogs.MsgTypeError,
+					"room":    data.Room,
+				})
 			}
 		} else if publishAction == "sttForAllStop" {
 			_, err = StopTranscriberAction(data.Room, uid)
 			if err != nil {
-				logger.Errorf("Error in StopTranscriberAction: %v for uid: %v", err, uid)
+				awslogs.AddSLog(map[string]string{
+					"func":    "RoomActionController",
+					"message": fmt.Sprintf("Error in StopTranscriberAction: %v for uid: %v", err, uid),
+					"type":    awslogs.MsgTypeError,
+					"room":    data.Room,
+				})
 			}
 		}
 	}

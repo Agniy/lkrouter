@@ -29,7 +29,7 @@ func NewGoogleTranscriber(room string, audioUrl string, lang string) *Transcribe
 	// Creates a client.
 	client, err := speech.NewClient(ctx, option.WithCredentialsFile(cfg.App.GoogleAppCredPath))
 	if err != nil {
-		logger.Fatalf("Failed to create client: %v", err)
+		logger.Printf("Failed to create client: %v", err)
 	}
 	return &Transcribe{
 		room:         room,

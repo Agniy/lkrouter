@@ -1,10 +1,11 @@
 package transcriber
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"lkrouter/communications"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
 )
@@ -18,12 +19,26 @@ type TranscriberData struct {
 func TranscriberStartController(c *gin.Context) {
 	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "TranscriberStartController",
+			"message": "Error binding json to TranscriberData",
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}
 
 	transcResponse, err := StartTranscriberAction(&data)
 	if err != nil {
+		awslogs.AddSLog(map[string]string{
+			"func":    "TranscriberStartController",
+			"message": fmt.Sprintf("Error in StartTranscriberAction: %v, with data: %+v", err, data),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}
@@ -37,6 +52,14 @@ func TranscriberStartController(c *gin.Context) {
 func StartTranscriberAction(data *TranscriberData) (*communications.TranscribeReq, error) {
 	trackId, err := livekitserv.NewLiveKitService().GetAudioTrackID(data.Room, data.Uid)
 	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartTranscriberAction",
+			"message": fmt.Sprintf("Livekit error in GetAudioTrackID: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+
 		return nil, err
 	}
 
@@ -52,7 +75,6 @@ func StartTranscriberAction(data *TranscriberData) (*communications.TranscribeRe
 }
 
 func saveUserLang(data *TranscriberData) {
-	logger := logrus.New()
 	// set lang to sid_langs field in call collection
 	err := mrequests.UpdateCallByBsonFilter(
 		bson.M{"url": data.Room},
@@ -60,13 +82,25 @@ func saveUserLang(data *TranscriberData) {
 			"stt_user_lang." + data.Uid: data.Lang,
 		}})
 	if err != nil {
-		logger.Errorf("Error in saveUserLang: %v", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "saveUserLang",
+			"message": fmt.Sprintf("Error in saveUserLang: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 }
 
 func TranscriberStopController(c *gin.Context) {
 	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "TranscriberStopController",
+			"message": "Error binding json to TranscriberData",
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}
@@ -74,6 +108,14 @@ func TranscriberStopController(c *gin.Context) {
 	// get url from transcriber service
 	transcResponse, err := StopTranscriberAction(data.Room, data.Uid)
 	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "TranscriberStopController",
+			"message": fmt.Sprintf("Error in StopTranscriberAction: %v, with data: %+v", err, data),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+
 		c.AbortWithError(500, err)
 		return
 	}

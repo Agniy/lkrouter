@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"lkrouter/domain"
+	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/livekitserv"
 	rservice "lkrouter/service"
 	"net/http"
@@ -24,6 +25,13 @@ func CallStopController(c *gin.Context) {
 
 	data := CallStopData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "CallStopController",
+			"message": fmt.Sprintf("Error binding json to CallStopData: %v", err),
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -31,23 +39,54 @@ func CallStopController(c *gin.Context) {
 	// check user permission
 	hasPermission, err := rservice.NewAuthService().CheckRoomPermission(c, data.Room)
 	if !hasPermission {
-		fmt.Printf("User has no permission to stop room %v, error: %v \n", data.Room, err)
+		msg := fmt.Sprintf("User has no permission to stop room %v, error: %v", data.Room, err)
+		fmt.Println(msg)
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "CallStopController",
+			"message": fmt.Sprintf(msg),
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeWarn,
+		})
+
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
 	// Send message to all participants in the room
 	msg, _ := json.Marshal(domain.RoomActionMessage{Action: "roomStop"})
-	err = livekitserv.NewLiveKitService().SendMessageToParticipants(
-		data.Room, msg, "room_action")
+	err = livekitserv.NewLiveKitService().SendMessageToParticipants(data.Room, msg, "room_action")
+	if err != nil {
+		awslogs.AddSLog(map[string]string{
+			"func":    "CallStopController",
+			"message": fmt.Sprintf("Livekit error sending message to participants in room %v: %v", data.Room, err),
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeError,
+		})
+	}
 
 	// Call DeleteRoom after a delay of 3 seconds
 	time.AfterFunc(3*time.Second, func() {
 		err = livekitserv.NewLiveKitService().DeleteRoom(data.Room)
 		if err != nil {
-			fmt.Printf("Error stop room %v, error: %v \n", data.Room, err)
+			msg := fmt.Sprintf("Livekit error stop room %v, error: %v", data.Room, err)
+
+			awslogs.AddSLog(map[string]string{
+				"func":    "CallStopController",
+				"message": msg,
+				"room":    data.Room,
+				"type":    awslogs.MsgTypeError,
+			})
+
+		} else {
+			awslogs.AddSLog(map[string]string{
+				"func":    "CallStopController",
+				"message": fmt.Sprintf("Room %v stopped", data.Room),
+				"room":    data.Room,
+				"type":    awslogs.MsgTypeInfo,
+			})
+
 		}
-		fmt.Printf("Room %v stopped \n", data.Room)
 	})
 
 	response := CallStopResponse{

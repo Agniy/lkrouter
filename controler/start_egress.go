@@ -36,12 +36,27 @@ func IfRoomRecordStatusIsStopping(room string) bool {
 func StartEgressController(c *gin.Context) {
 	data := EgressStartData{}
 	if err := c.BindJSON(&data); err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": fmt.Sprintf("Error binding json to EgressStartData: %v", err),
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
 	//check if room record status is stopping
 	if IfRoomRecordStatusIsStopping(data.Room) {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": fmt.Sprintf("Room record status is stopping, room: %v", data.Room),
+			"type":    awslogs.MsgTypeWarn,
+			"room":    data.Room,
+		})
+
 		c.JSON(http.StatusMethodNotAllowed, gin.H{
 			"error": "Room record status is not stopped",
 			"notifications": []domain.RoomHttpNotification{
@@ -59,6 +74,14 @@ func StartEgressController(c *gin.Context) {
 
 	egressId, err := egresserv.StartTrackEgress(data.Room, data.Company)
 	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": fmt.Sprintf("Livekit error starting egress: %v", err),
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeError,
+		})
+
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return
 	}
@@ -66,27 +89,43 @@ func StartEgressController(c *gin.Context) {
 	// save to redis db
 	err = redisdb.Set("room_egress_"+data.Room, egressId, 24*time.Hour)
 	if err != nil {
-		fmt.Println("Error saving egress ID to redis", err)
+		msg := fmt.Sprintf("Redis error saving egress ID to redis: %v", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": msg,
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeError,
+		})
 	}
 
 	fmt.Println("Try to send to room: ", data.Room, " new metadata: \"rec\": \"true\"")
 
-	room, err := livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
+	_, err = livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
 		"rec":        true,
 		"rec-status": "started",
 	})
 
 	if err != nil {
-		fmt.Println("Error updating room metadata", err)
+		msg := fmt.Sprintf("Livekit error updating room metadata: %v", err)
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": msg,
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeError,
+		})
 	}
 
 	// Update room metadata in MongoDB
 	err = mrequests.SetRecordStatus(data.Room, true)
 	if err != nil {
-		fmt.Println("Error updating room metadata in MongoDB", err)
+		awslogs.AddSLog(map[string]string{
+			"func":    "StartEgressController",
+			"message": fmt.Sprintf("MongoDB error updating room metadata: %v", err),
+			"room":    data.Room,
+			"type":    awslogs.MsgTypeError,
+		})
 	}
-
-	fmt.Println("Room metadata updated", room.Metadata)
 
 	awslogs.AddSLog(map[string]string{
 		"func":    "StartEgressController",
