@@ -63,6 +63,15 @@ func RoomActionController(c *gin.Context) {
 			"stt_for_all_lang":      data.Lang.Code,
 			"stt_for_all_lang_text": data.Lang.Text,
 		}})
+	if err != nil {
+
+		awslogs.AddSLog(map[string]string{
+			"func":    "RoomActionController",
+			"message": fmt.Sprintf("MongoDB error in UpdateCallByBsonFilter: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+	}
 
 	// set livekit user lang
 	_, err = livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
@@ -71,10 +80,9 @@ func RoomActionController(c *gin.Context) {
 	})
 
 	if err != nil {
-
 		awslogs.AddSLog(map[string]string{
 			"func":    "RoomActionController",
-			"message": fmt.Sprintf("MongoDB error in UpdateCallByBsonFilter: %v", err),
+			"message": fmt.Sprintf("Livekit error update sttForAll in UpdateRoomMData: %v", err),
 			"type":    awslogs.MsgTypeError,
 			"room":    data.Room,
 		})
