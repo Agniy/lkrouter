@@ -64,6 +64,12 @@ func RoomActionController(c *gin.Context) {
 			"stt_for_all_lang_text": data.Lang.Text,
 		}})
 
+	// set livekit user lang
+	_, err = livekitserv.NewLiveKitService().UpdateRoomMData(data.Room, map[string]interface{}{
+		"sttForAll":     sttForAll,
+		"sttForAllLang": data.Lang.Code,
+	})
+
 	if err != nil {
 
 		awslogs.AddSLog(map[string]string{
