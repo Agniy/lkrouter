@@ -25,6 +25,25 @@ type LiveKitService struct {
 	logger *logrus.Logger
 }
 
+func (l *LiveKitService) UpdateUserMData(roomID string, identity string, metadata map[string]interface{}) (*livekit.ParticipantInfo, error) {
+	ctx := context.Background()
+	jsonBytes, err := json.Marshal(metadata)
+	if err != nil {
+		return nil, err
+	}
+
+	req := &livekit.UpdateParticipantRequest{
+		Room:     roomID,
+		Identity: identity,
+		Metadata: string(jsonBytes),
+	}
+	participant, err := l.client.UpdateParticipant(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return participant, nil
+}
+
 func (l *LiveKitService) UpdateRoomMData(roomID string, metadata map[string]interface{}) (*livekit.Room, error) {
 	ctx := context.Background()
 	jsonBytes, err := json.Marshal(metadata)

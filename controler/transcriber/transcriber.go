@@ -89,6 +89,20 @@ func saveUserLang(data *TranscriberData) {
 			"room":    data.Room,
 		})
 	}
+
+	// send livekit user Metadata
+	_, err = livekitserv.NewLiveKitService().UpdateUserMData(data.Room, data.Uid, map[string]interface{}{
+		"sttActive": true,
+		"sttLang":   data.Lang,
+	})
+	if err != nil {
+		awslogs.AddSLog(map[string]string{
+			"func":    "saveUserLang",
+			"message": fmt.Sprintf("Error in UpdateUserMData: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+	}
 }
 
 func TranscriberStopController(c *gin.Context) {
@@ -118,6 +132,19 @@ func TranscriberStopController(c *gin.Context) {
 
 		c.AbortWithError(500, err)
 		return
+	}
+
+	// send livekit user Metadata
+	_, err = livekitserv.NewLiveKitService().UpdateUserMData(data.Room, data.Uid, map[string]interface{}{
+		"sttActive": false,
+	})
+	if err != nil {
+		awslogs.AddSLog(map[string]string{
+			"func":    "TranscriberStopController",
+			"message": fmt.Sprintf("Error in UpdateUserMData: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
 	}
 
 	c.JSON(200, transcResponse)
