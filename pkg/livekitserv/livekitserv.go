@@ -145,3 +145,19 @@ func (l *LiveKitService) RealParticipantsByRoom(roomID string) ([]*livekit.Parti
 
 	return activeParticipants, nil
 }
+
+func (l *LiveKitService) SendMessageToParticipant(roomID string, participantID string, message []byte, topicName string) error {
+	sendResponse, err := l.client.SendData(context.Background(), &livekit.SendDataRequest{
+		Room:                  roomID,
+		DestinationIdentities: []string{participantID},
+		Data:                  message,
+		Topic:                 &topicName,
+	})
+	if err != nil {
+		return err
+	}
+
+	l.logger.Infof("Send message to participant %s in room %s, response: %v", participantID, roomID, sendResponse)
+
+	return nil
+}
