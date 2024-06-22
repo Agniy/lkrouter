@@ -270,3 +270,12 @@ func AddSLog(mes map[string]string) {
 		})
 	}
 }
+
+func LogError(funcName string, message string, room string) {
+	AddSLog(map[string]string{
+		"func":    funcName,
+		"message": message,
+		"type":    MsgTypeError,
+		"room":    room,
+	})
+}
