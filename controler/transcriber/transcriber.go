@@ -135,7 +135,7 @@ func TranscriberStopController(c *gin.Context) {
 	}
 
 	// send livekit user Metadata
-	participantInfo, err := livekitserv.NewLiveKitService().UpdateUserMData(data.Room, data.Uid, map[string]interface{}{
+	_, err = livekitserv.NewLiveKitService().UpdateUserMData(data.Room, data.Uid, map[string]interface{}{
 		"sttActive": false,
 	})
 	if err != nil {
@@ -146,15 +146,6 @@ func TranscriberStopController(c *gin.Context) {
 			"room":    data.Room,
 		})
 	}
-
-	fmt.Printf("ParticipantInfo after stop stt: %+v", participantInfo)
-
-	participantList, err := livekitserv.NewLiveKitService().RealParticipantsByRoom(data.Room)
-	if err != nil {
-		fmt.Printf("Error in RealParticipantsByRoom: %v", err)
-	}
-
-	fmt.Printf("ParticipantList after stop stt: %+v", participantList)
 
 	c.JSON(200, transcResponse)
 }
