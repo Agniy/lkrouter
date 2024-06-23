@@ -81,7 +81,8 @@ func saveUserLang(data *TranscriberData) {
 	err := mrequests.UpdateCallByBsonFilter(
 		bson.M{"url": data.Room},
 		bson.M{"$set": bson.M{
-			"stt_user_lang." + data.Uid: data.Lang,
+			"stt_user_lang." + data.Uid:   data.Lang,
+			"stt_user_active." + data.Uid: true,
 		}})
 	if err != nil {
 		awslogs.AddSLog(map[string]string{
@@ -178,6 +179,20 @@ func TranscriberStopController(c *gin.Context) {
 		awslogs.AddSLog(map[string]string{
 			"func":    "TranscriberStopController",
 			"message": fmt.Sprintf("Error in SendTranscriberStopMessage: %v", err),
+			"type":    awslogs.MsgTypeError,
+			"room":    data.Room,
+		})
+	}
+
+	err = mrequests.UpdateCallByBsonFilter(
+		bson.M{"url": data.Room},
+		bson.M{"$set": bson.M{
+			"stt_user_active." + data.Uid: false,
+		}})
+	if err != nil {
+		awslogs.AddSLog(map[string]string{
+			"func":    "saveUserLang",
+			"message": fmt.Sprintf("Error in UpdateCallByBsonFilter: %v", err),
 			"type":    awslogs.MsgTypeError,
 			"room":    data.Room,
 		})
