@@ -122,10 +122,10 @@ func saveUserLang(data *TranscriberData) {
 
 func SendTranscriberStartMessage(room string, uid string, lang string) error {
 	sttMsg := domain.LKSttMsg{
-		Type: domain.RoomActionTopic,
+		Type: domain.SttStateTopic,
 		Payload: domain.SttActionMsg{
-			Action: "sttStart",
-			Lang:   lang,
+			Enabled: true,
+			Lang:    lang,
 		},
 	}
 	sttMsgBytes, _ := json.Marshal(sttMsg)
@@ -203,9 +203,9 @@ func TranscriberStopController(c *gin.Context) {
 
 func SendTranscriberStopMessage(room string, uid string) error {
 	sttMsg := domain.LKSttMsg{
-		Type: domain.RoomActionTopic,
+		Type: domain.SttStateTopic,
 		Payload: domain.SttActionMsg{
-			Action: "sttStop",
+			Enabled: false,
 		},
 	}
 	sttMsgBytes, _ := json.Marshal(sttMsg)

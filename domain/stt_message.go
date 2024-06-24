@@ -6,6 +6,6 @@ type LKSttMsg struct {
 }
 
 type SttActionMsg struct {
-	Action string `json:"action"`
-	Lang   string `json:"lang"`
+	Enabled bool   `json:"enabled"`
+	Lang    string `json:"lang"`
 }
