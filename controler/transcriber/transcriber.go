@@ -2,6 +2,7 @@ package transcriber
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,6 +11,7 @@ import (
 	"lkrouter/pkg/awslogs"
 	"lkrouter/pkg/livekitserv"
 	"lkrouter/pkg/mongodb/mrequests"
+	"strings"
 )
 
 type TranscriberData struct {
@@ -21,13 +23,23 @@ type TranscriberData struct {
 func TranscriberStartController(c *gin.Context) {
 	data := TranscriberData{}
 	if err := c.BindJSON(&data); err != nil {
-
 		awslogs.AddSLog(map[string]string{
 			"func":    "TranscriberStartController",
 			"message": "Error binding json to TranscriberData",
 			"type":    awslogs.MsgTypeError,
 		})
+		c.AbortWithError(500, err)
+		return
+	}
 
+	// check uid that it's not EG_
+	if strings.HasPrefix(data.Uid, "EG_") {
+		errMsg := fmt.Sprintf("User %v is not allowed to start transcriber", data.Uid)
+		awslogs.LogError(
+			"TranscriberStartController",
+			errMsg,
+			data.Room)
+		err := errors.New(errMsg)
 		c.AbortWithError(500, err)
 		return
 	}
