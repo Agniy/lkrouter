@@ -85,6 +85,18 @@ func StartTranscriberAction(data *TranscriberData) (*communications.TranscribeRe
 		ParticipantId: data.Uid,
 	}
 
+	// set stt active to false
+	err = mrequests.UpdateCallByBsonFilter(
+		bson.M{"url": data.Room},
+		bson.M{"$set": bson.M{
+			"stt_user_active." + data.Uid: true,
+		}})
+	if err != nil {
+		awslogs.LogError(
+			"StopTranscriberAction",
+			fmt.Sprintf("Error in UpdateCallByBsonFilter whe set stt_user_active: %v to %v", err, false), data.Room)
+	}
+
 	return transcRequest.TranscriberAction("start")
 }
 
