@@ -230,5 +230,25 @@ func StopTranscriberAction(room string, uid string) (*communications.TranscribeR
 		ParticipantId: uid,
 	}
 
-	return transcRequest.TranscriberAction("stop")
+	transResponse, err := transcRequest.TranscriberAction("stop")
+	if err != nil {
+		awslogs.LogError(
+			"StopTranscriberAction",
+			fmt.Sprintf("Error in TranscriberAction: %v", err), room)
+		return nil, err
+	}
+
+	// set stt active to false
+	err = mrequests.UpdateCallByBsonFilter(
+		bson.M{"url": room},
+		bson.M{"$set": bson.M{
+			"stt_user_active." + uid: false,
+		}})
+	if err != nil {
+		awslogs.LogError(
+			"StopTranscriberAction",
+			fmt.Sprintf("Error in UpdateCallByBsonFilter whe set stt_user_active: %v to %v", err, false), room)
+	}
+
+	return transResponse, err
 }
