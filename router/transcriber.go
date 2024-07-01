@@ -20,5 +20,9 @@ func TranscriberRouter(r *gin.Engine) {
 			transcriber.RoomActionController(c)
 		})
 
+		egreessRouter.POST("/remove_msg", func(c *gin.Context) {
+			transcriber.RemoveMsgController(c)
+		})
+
 	}
 }
