@@ -40,7 +40,7 @@ func RemoveMsgController(c *gin.Context) {
 		"url": data.Room,
 	}, bson.M{"$pull": bson.M{"transcrib_text": bson.M{"msgID": data.MsgId}}})
 	if err != nil {
-		logger.Info("RemoveSttMessage: ", "Error when remove message from call by msgId: ", msgId, err)
+		logger.Info("RemoveSttMessage: ", "Error when remove message from call by msgId: ", data.MsgId, err)
 		logAndAbort(c, "RemoveMsgController", "Error when remove message from call by msgId", err)
 	}
 
